@@ -48,14 +48,14 @@ export function page(t, unis, { css, js, api }) {
 <a class="skip" href="#main">${t.lang === 'ru' ? 'К содержанию' : '跳到内容'}</a>
 <header class="bar">
 <div class="wrap bar-in">
-<a class="logo" href="#top" aria-label="俄罗斯教育中心 Russian Education Center"><b>俄罗斯教育中心</b><span>Russian Education Center</span></a>
+<a class="logo" href="#about" aria-label="俄罗斯教育中心 Russian Education Center"><b>俄罗斯教育中心</b><span>Russian Education Center</span></a>
 <nav aria-label="${t.lang === 'ru' ? 'Разделы' : '导航'}">${t.nav.map(([h, l]) => `<a href="${h}">${esc(l)}</a>`).join('')}</nav>
 <button type="button" class="btn sm" data-open="">${esc(t.cta_header)}</button>
 </div>
 </header>
 
 <main id="main">
-<section class="hero" id="top">
+<section class="hero" id="about">
 <div class="wrap">
 ${skyline}
 <h1>${esc(t.hero_h1)}</h1>
