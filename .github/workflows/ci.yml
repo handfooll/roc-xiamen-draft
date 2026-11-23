@@ -71,3 +71,4 @@ jobs:
       - name: smoke test
         run: |
           curl -fsS https://${{ vars.DEPLOY_HOST_DOMAIN || vars.DEPLOY_HOST }}/ | grep -q '<h1'
+          curl -fsS https://${{ vars.DEPLOY_HOST_DOMAIN || vars.DEPLOY_HOST }}/api/health | grep -q ok

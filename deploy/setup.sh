@@ -80,8 +80,10 @@ if [ ! -f /etc/nginx/rea.htpasswd ]; then
 fi
 
 install -m 644 "$HERE/rea-lead.service" /etc/systemd/system/rea-lead.service
+install -m 644 "$HERE/rea-backup.service" "$HERE/rea-backup.timer" /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable rea-lead
+systemctl enable --now rea-backup.timer
 
 # placeholder page until the first deploy
 if [ ! -e /var/www/rea/current ]; then

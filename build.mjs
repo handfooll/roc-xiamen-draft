@@ -22,5 +22,6 @@ const t = JSON.parse(readFileSync(`content/${lang}.json`, 'utf8'));
 const unis = JSON.parse(readFileSync('content/universities.json', 'utf8'));
 
 writeFileSync(`${out}/index.html`, page(t, unis, { css, js, api }));
+writeFileSync(`${out}/404.html`, readFileSync('src/404.html', 'utf8').replace('__CSS__', css));
 for (const f of ['favicon.svg', 'og.png', 'robots.txt']) if (existsSync(`src/${f}`)) copyFileSync(`src/${f}`, `${out}/${f}`);
 console.log(`built ${out}/ (${lang}, api=${api || 'preview'})`);

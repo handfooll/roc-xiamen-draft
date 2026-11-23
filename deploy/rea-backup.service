@@ -1,0 +1,14 @@
+[Unit]
+Description=Backup of landing page leads
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/rea/server/backup.py
+Environment=LEAD_DB=/var/lib/rea/leads.db
+DynamicUser=yes
+StateDirectory=rea
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateNetwork=yes

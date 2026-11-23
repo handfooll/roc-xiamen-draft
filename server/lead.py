@@ -195,6 +195,10 @@ class Handler(BaseHTTPRequestHandler):
         self.send(200, b'{"ok":true}')
 
     def do_GET(self):
+        if self.path == "/api/health":
+            with db() as con:
+                con.execute("SELECT 1").fetchone()
+            return self.send(200, b'{"ok":true}')
         # nginx guards /admin with basic auth; this process only listens on 127.0.0.1
         if self.path == "/admin" or self.path == "/admin/":
             return self.send(200, admin_page(all_rows()), "text/html; charset=utf-8")

@@ -91,6 +91,19 @@ class Http(unittest.TestCase):
         with urllib.request.urlopen(self.base + "/admin/leads.csv") as r:
             self.assertIn("wx_limin", r.read().decode("utf-8"))
 
+    def test_health_and_backup(self):
+        with urllib.request.urlopen(self.base + "/api/health") as r:
+            self.assertEqual(r.status, 200)
+        import backup
+        os.environ["LEAD_DB"] = lead.DB_PATH
+        backup.DB = lead.DB_PATH
+        backup.DIR = __import__("pathlib").Path(lead.DB_PATH).parent / "backups"
+        target = backup.run()
+        self.assertTrue(target.exists())
+        import sqlite3
+        with sqlite3.connect(target) as con:
+            con.execute("SELECT COUNT(*) FROM leads").fetchone()
+
     def test_rejects(self):
         self.assertEqual(self.post(GOOD, ctype="text/plain"), 415)
         self.assertEqual(self.post(b"{not json"), 400)

@@ -195,3 +195,7 @@ body.locked{overflow:hidden}
   *,*::before,*::after{animation:none!important;transition:none!important}
   .draw{stroke-dashoffset:0}
 }
+/* 404 */
+.nf{min-height:100vh;min-height:100dvh;background:var(--blue);color:#fff;display:flex;flex-direction:column;justify-content:center;gap:28px;padding:32px max(20px,env(safe-area-inset-left,0px))}
+.nf h1{font-size:clamp(28px,6vw,48px);line-height:1.15}
+.nf .btn{align-self:flex-start;text-decoration:none}
