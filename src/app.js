@@ -18,7 +18,7 @@
     });
     if (filtered) list.classList.add('all');
     else list.classList.toggle('all', more.getAttribute('aria-expanded') === 'true');
-    more.hidden = filtered;
+    list.classList.toggle('filtered', filtered);
     empty.hidden = shown > 0;
   }
   ['city', 'profile'].forEach(function (group) {
@@ -38,6 +38,24 @@
     applyFilter();
     if (!open) $('#universities').scrollIntoView();
   });
+
+  /* entrance for blocks below the first screen; content stays visible without script or observer */
+  if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        e.target.classList.remove('pre');
+        io.unobserve(e.target);
+      });
+    }, { rootMargin: '0px 0px -8% 0px' });
+    $$('.sec h2, .why h2, .prog, .why li, .filters, .steps li, .formbox').forEach(function (el) {
+      if (el.closest('.modal') || el.getBoundingClientRect().top < innerHeight) return;
+      var sib = el.parentNode ? Array.prototype.indexOf.call(el.parentNode.children, el) : 0;
+      el.style.setProperty('--i', Math.min(sib, 5));
+      el.classList.add('pre', 'rise');
+      io.observe(el);
+    });
+  }
 
   /* lead forms */
   function bind(box) {
@@ -98,6 +116,7 @@
   var modal = $('#modal'), body = $('.modal-body', modal);
   var copy = $('#formbox').cloneNode(true);
   copy.removeAttribute('id');
+  [copy].concat($$('.pre', copy)).forEach(function (el) { el.classList.remove('pre', 'rise'); });
   $$('[id]', copy).forEach(function (el) { el.id = 'm-' + el.id; });
   $$('[for]', copy).forEach(function (el) { el.htmlFor = 'm-' + el.htmlFor; });
   $('h2', copy).id = 'modal-h';

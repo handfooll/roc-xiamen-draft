@@ -1,4 +1,7 @@
-const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const escRaw = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+// keep short Russian words on the same line as the next word
+const glue = s => String(s).replace(/(^|[\s(«])(в|во|и|с|со|к|ко|у|о|об|а|но|до|от|на|по|из|за|без|для|не|при|под|над|через|про)\s/gi, '$1$2\u00a0');
+let esc = escRaw;
 
 const skyline = `<svg class="line" viewBox="0 0 420 100" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
 <path class="draw" stroke="currentColor" stroke-width="1.8" d="M2 90H34V64C20 64 10 58 5 46C26 58 50 56 70 46C90 56 114 58 134 46C129 58 118 64 106 64V90H196V66H206V58H214V66H222V58H230V66H238V90H196M204 58V38H232V58M208 38V30H228V38M212 30L218 8L224 30M240 90H418"/>
@@ -7,6 +10,7 @@ const skyline = `<svg class="line" viewBox="0 0 420 100" fill="none" stroke-line
 </svg>`;
 
 export function page(t, unis, { css, js, api }) {
+  esc = t.lang === 'ru' ? s => escRaw(glue(s)) : escRaw;
   const cityName = Object.fromEntries(t.cities);
   const profName = Object.fromEntries(t.profiles);
   const count = k => k === 'all' ? unis.length : unis.filter(u => u.city.includes(k)).length;
@@ -19,22 +23,22 @@ export function page(t, unis, { css, js, api }) {
     return `<li class="uni" data-city="${u.city.join(' ')}" data-profile="${u.profile || ''}"${u.top ? ' data-top' : ''}>
 <h3>${esc(u.ru)}</h3>
 <p class="meta">${esc(place)}${u.profile ? ' · ' + esc(profName[u.profile]) : ''}</p>${u.note ? `\n<p class="meta">${esc(u.note)}</p>` : ''}
-<button type="button" class="btn ghost sm" data-open="${esc(dir)}">${esc(t.uni_cta)}</button>
+<button type="button" class="btn ghost sm" data-open="${escRaw(dir)}">${esc(t.uni_cta)}</button>
 </li>`;
   };
-  const dirOptions = t.programs.map(p => `<option>${esc(p.dir)}</option>`).join('');
+  const dirOptions = t.programs.map(p => `<option>${escRaw(p.dir)}</option>`).join('');
 
   return `<!doctype html>
 <html lang="${t.lang}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>${esc(t.title)}</title>
-<meta name="description" content="${esc(t.description)}">
+<title>${escRaw(t.title)}</title>
+<meta name="description" content="${escRaw(t.description)}">
 <meta name="theme-color" content="#0b2a5b">
 <meta property="og:type" content="website">
-<meta property="og:title" content="${esc(t.title)}">
-<meta property="og:description" content="${esc(t.description)}">
+<meta property="og:title" content="${escRaw(t.title)}">
+<meta property="og:description" content="${escRaw(t.description)}">
 <meta property="og:image" content="og.png">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="${css}">
@@ -68,7 +72,7 @@ ${skyline}
 ${t.programs.map(p => `<article class="prog" id="p-${p.id}">
 <h3>${esc(p.title)}</h3>
 <ul>${p.points.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
-<button type="button" class="btn" data-open="${esc(p.dir)}">${esc(p.cta)}</button>
+<button type="button" class="btn" data-open="${escRaw(p.dir)}">${esc(p.cta)}</button>
 </article>`).join('\n')}
 </div>
 </div>
@@ -90,9 +94,9 @@ ${t.programs.map(p => `<article class="prog" id="p-${p.id}">
 </div>
 <ul class="unis" id="unis" aria-live="polite">
 ${unis.map(uniCard).join('\n')}
+<li class="more-cell"><button type="button" class="btn ghost" id="uni-more" aria-controls="unis" aria-expanded="false" data-more="${escRaw(t.uni_more)}" data-less="${escRaw(t.uni_less)}">${esc(t.uni_more)}</button></li>
 </ul>
 <p class="empty" id="uni-empty" hidden>${esc(t.uni_empty)}</p>
-<button type="button" class="btn ghost" id="uni-more" aria-controls="unis" aria-expanded="false" data-more="${esc(t.uni_more)}" data-less="${esc(t.uni_less)}">${esc(t.uni_more)}</button>
 </div>
 </section>
 

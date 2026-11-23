@@ -74,6 +74,8 @@ h2{font-size:clamp(24px,5.6vw,38px);line-height:1.15;letter-spacing:-.015em;max-
 .chip{flex:none;min-height:40px;padding:0 14px;border:0;border-radius:999px;background:var(--card);color:var(--ink);font-size:14px;cursor:pointer;touch-action:manipulation;transition:background-color .2s,color .2s}
 .chip span{opacity:.6;margin-left:2px}
 .chip[aria-pressed=true]{background:var(--blue);color:#fff}
+.chip:active{transform:scale(.96)}
+@media(hover:hover){.chip[aria-pressed=false]:hover{background:var(--blue-soft)}}
 .unis{display:grid;gap:10px;margin-top:16px}
 .uni{background:var(--card);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:6px}
 .uni h3{font-size:16px;line-height:1.35}
@@ -82,7 +84,8 @@ h2{font-size:clamp(24px,5.6vw,38px);line-height:1.15;letter-spacing:-.015em;max-
 .unis:not(.all) .uni:not([data-top]){display:none}
 .unis .uni.off{display:none!important}
 .empty{margin-top:16px;color:var(--ink-2)}
-#uni-more{margin-top:16px}
+.more-cell{display:flex;align-items:center}
+.unis.filtered .more-cell{display:none}
 
 .steps ol{counter-reset:s;display:grid;gap:10px;margin-top:22px}
 .steps li{counter-increment:s;background:var(--card);border-radius:var(--r);padding:18px 18px 18px 64px;position:relative;font-size:17px;font-weight:600;line-height:1.35;min-height:64px;display:flex;align-items:center}
@@ -142,6 +145,7 @@ body.locked{overflow:hidden}
   .why ul{grid-template-columns:repeat(4,1fr);gap:16px}
   .why li{min-height:140px;display:flex;align-items:flex-end;font-size:20px}
   .unis{grid-template-columns:repeat(2,1fr);gap:14px}
+  .more-cell{justify-content:flex-start}
   .steps ol{grid-template-columns:repeat(5,1fr);gap:14px}
   .steps li{flex-direction:column;align-items:flex-start;justify-content:flex-end;padding:66px 18px 20px;min-height:180px}
   .steps li::before{top:18px;transform:none;left:18px}
@@ -159,9 +163,18 @@ body.locked{overflow:hidden}
   .hero h1,.hero .lead,.hero .btn{grid-column:1;justify-self:start}
   .stats{grid-column:1/-1}
   .unis{grid-template-columns:repeat(3,1fr)}
+  .unis:not(.all) .more-cell{grid-column:span 2}
+  .unis.all .more-cell{grid-column:1/-1}
   .contact .wrap{display:flex;justify-content:center}
 }
+/* entrance: only for blocks below the first screen, set by app.js */
+.pre{opacity:0;transform:translateY(22px)}
+.rise{transition:opacity .6s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1);transition-delay:calc(var(--i,0) * 70ms)}
+/* Chinese: no letter-spacing tricks, strict line breaking */
+:lang(zh) h1,:lang(zh) h2{letter-spacing:0}
+:lang(zh){line-break:strict;word-break:normal}
 @media(prefers-reduced-motion:reduce){
+  .pre{opacity:1;transform:none}
   html{scroll-behavior:auto}
   *,*::before,*::after{animation:none!important;transition:none!important}
   .draw{stroke-dashoffset:0}
