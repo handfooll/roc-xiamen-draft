@@ -5,12 +5,18 @@
 set -euo pipefail
 
 if [ "${1:-}" = "--lock-ssh" ]; then
-  cat > /etc/ssh/sshd_config.d/90-rea.conf <<'CONF'
+  # refuse unless an admin (root or ubuntu) can still log in with a key
+  if ! grep -qs '^ssh-' /root/.ssh/authorized_keys /home/ubuntu/.ssh/authorized_keys; then
+    echo "No admin SSH key for root or ubuntu. Add one first, or you will be locked out."; exit 1
+  fi
+  # 00- so it wins over cloud-init's 50-cloud-init.conf (sshd keeps the first value it reads)
+  cat > /etc/ssh/sshd_config.d/00-rea.conf <<'CONF'
 PasswordAuthentication no
 KbdInteractiveAuthentication no
 PermitRootLogin prohibit-password
 CONF
   sshd -t && systemctl reload ssh
+  sshd -T | grep -qi '^passwordauthentication no' || { echo "password login is STILL on, check sshd_config.d"; exit 1; }
   echo "SSH: password login switched off"
   exit 0
 fi
@@ -23,10 +29,11 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -q
-apt-get upgrade -yq
+apt-get upgrade -yq -o Dpkg::Options::=--force-confold -o Dpkg::Options::=--force-confdef
 apt-get install -yq nginx certbot fail2ban unattended-upgrades apache2-utils rsync python3 ufw
 dpkg-reconfigure -f noninteractive unattended-upgrades
 
+# also open 80 and 443 in the Lighthouse firewall in the Tencent console, ufw does not cover that
 ufw allow OpenSSH
 ufw allow 'Nginx Full'
 ufw --force enable

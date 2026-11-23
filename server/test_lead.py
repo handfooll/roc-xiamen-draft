@@ -25,6 +25,7 @@ class Clean(unittest.TestCase):
         self.assertEqual(lead.clean({**GOOD, "website": "http://spam"}), (None, None))
         self.assertEqual(lead.clean({**GOOD, "elapsed": 300}), (None, None))
         self.assertEqual(lead.clean({**GOOD, "elapsed": "9000"}), (None, None))
+        self.assertEqual(lead.clean({**GOOD, "elapsed": float("nan")}), (None, None))
 
     def test_invalid(self):
         self.assertEqual(lead.clean({**GOOD, "consent": False})[1], "consent required")
@@ -41,9 +42,12 @@ class Clean(unittest.TestCase):
 
 class Output(unittest.TestCase):
     def test_csv_formula_escaped(self):
-        for bad in ("=HYPERLINK(1)", "+1", "-1", "@x"):
+        for bad in ("=HYPERLINK(1)", "@x", "+SUM(1)", "-A1"):
             self.assertEqual(lead.csv_cell(bad), "'" + bad)
         self.assertEqual(lead.csv_cell("wx_1"), "wx_1")
+        self.assertEqual(lead.csv_cell("+86 138 0000 0000"), "+86 138 0000 0000")
+        self.assertEqual(lead.csv_cell("+7 (999) 123-45-67"), "+7 (999) 123-45-67")
+        self.assertEqual(lead.csv_cell("+SUM(1)"), "'+SUM(1)")
         data = lead.to_csv([("2026-11-23 10:00", "=cmd", "+86 1", "x", "ru")]).decode("utf-8")
         self.assertTrue(data.startswith("﻿"))
         self.assertIn("'=cmd", data)
@@ -92,6 +96,8 @@ class Http(unittest.TestCase):
         self.assertEqual(self.post(b"{not json"), 400)
         self.assertEqual(self.post(b"x" * (lead.MAX_BODY + 1)), 413)
         self.assertEqual(self.post({**GOOD, "consent": False}), 400)
+        self.assertEqual(self.post(b'{"a":' * 1200 + b'1' + b'}' * 1200), 400)
+        self.assertIn(self.post({**GOOD, "name": "\ud800"}), (400, 500))
 
     def test_rate_limit(self):
         codes = [self.post({**GOOD, "contact": f"wx_{i}"}, ip="9.9.9.9") for i in range(lead.MAX_PER_IP_HOUR + 1)]

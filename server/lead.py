@@ -7,7 +7,9 @@ import csv
 import html
 import io
 import json
+import math
 import os
+import re
 import smtplib
 import sqlite3
 import threading
@@ -30,7 +32,7 @@ def db():
     con = sqlite3.connect(DB_PATH, timeout=10)
     con.execute(
         "CREATE TABLE IF NOT EXISTS leads (id INTEGER PRIMARY KEY, created TEXT NOT NULL, name TEXT NOT NULL,"
-        " contact TEXT NOT NULL, direction TEXT, page TEXT, ip TEXT)"
+        " contact TEXT NOT NULL, direction TEXT, page TEXT, ip TEXT, consent TEXT)"
     )
     return con
 
@@ -42,7 +44,7 @@ def clean(payload):
     if payload.get("website"):
         return None, None
     elapsed = payload.get("elapsed")
-    if not isinstance(elapsed, (int, float)) or elapsed < MIN_FILL_MS:
+    if not isinstance(elapsed, (int, float)) or not math.isfinite(elapsed) or elapsed < MIN_FILL_MS:
         return None, None
     if payload.get("consent") is not True:
         return None, "consent required"
@@ -60,10 +62,15 @@ def clean(payload):
     return lead, None
 
 
+PHONE = re.compile(r"^[+-][\d\s()-]+$")
+
+
 def csv_cell(value):
-    """Stop spreadsheet apps from running cell content as a formula."""
+    """Stop spreadsheet apps from running cell content as a formula; phone numbers stay as they are."""
     value = "" if value is None else str(value)
-    return "'" + value if value[:1] in ("=", "+", "-", "@", "\t", "\r") else value
+    if value[:1] in ("=", "@") or (value[:1] in ("+", "-") and not PHONE.match(value)):
+        return "'" + value
+    return value
 
 
 def to_csv(rows):
@@ -131,8 +138,8 @@ def save(lead, ip):
         if recent >= MAX_PER_IP_HOUR:
             return None
         con.execute(
-            "INSERT INTO leads (created, name, contact, direction, page, ip) VALUES (?, ?, ?, ?, ?, ?)",
-            (created, lead["name"], lead["contact"], lead["direction"], lead["page"], ip),
+            "INSERT INTO leads (created, name, contact, direction, page, ip, consent) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (created, lead["name"], lead["contact"], lead["direction"], lead["page"], ip, "yes " + created),
         )
     return created
 
@@ -169,15 +176,19 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(413, b'{"ok":false}')
         try:
             payload = json.loads(self.rfile.read(length))
-        except (ValueError, UnicodeDecodeError):
+            lead, err = clean(payload)
+        except Exception:  # noqa: BLE001  bad JSON, NaN, deep nesting
             return self.send(400, b'{"ok":false}')
-        lead, err = clean(payload)
         if err:
             return self.send(400, json.dumps({"ok": False, "error": err}).encode())
         if lead is None:  # bot: look successful, store nothing
             return self.send(200, b'{"ok":true}')
         ip = self.headers.get("X-Real-IP") or self.client_address[0]
-        created = save(lead, ip)
+        try:
+            created = save(lead, ip)
+        except Exception as exc:  # noqa: BLE001
+            print("save failed:", exc, flush=True)
+            return self.send(500, b'{"ok":false}')
         if created is None:
             return self.send(429, b'{"ok":false}')
         threading.Thread(target=notify, args=(lead, created), daemon=True).start()
