@@ -78,7 +78,7 @@ ${t.programs.map(p => `<article class="prog" id="p-${p.id}">
 </div>
 </section>
 
-<section class="why" id="about" aria-labelledby="why-h">
+<section class="why" id="why" aria-labelledby="why-h">
 <div class="wrap">
 <h2 id="why-h">${esc(t.why_h)}</h2>
 <ul>${t.why.map(w => `<li>${esc(w)}</li>`).join('')}</ul>
