@@ -3,6 +3,8 @@
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var api = document.body.getAttribute('data-api');
+  if (/MicroMessenger/i.test(navigator.userAgent)) document.documentElement.classList.add('wx');
+  var touch = matchMedia('(pointer: coarse)').matches;
 
   /* university filters */
   var list = $('#unis'), more = $('#uni-more'), empty = $('#uni-empty');
@@ -19,6 +21,7 @@
     if (filtered) list.classList.add('all');
     else list.classList.toggle('all', more.getAttribute('aria-expanded') === 'true');
     list.classList.toggle('filtered', filtered);
+    list.classList.remove('swap'); void list.offsetWidth; list.classList.add('swap');
     empty.hidden = shown > 0;
   }
   ['city', 'profile'].forEach(function (group) {
@@ -101,7 +104,9 @@
       reset: function (dir) {
         form.reset(); form.hidden = false; $('.ok', box).hidden = true; status.hidden = true; started = Date.now();
         $$('.fld', form).forEach(function (f) { f.classList.remove('bad'); });
-        var sel = form.direction;
+        var sel = form.direction, picked = $('.picked', box);
+        if (picked) picked.textContent = dir ? (dir.indexOf(':') > 0 && dir.indexOf(':') < 6 ? dir : form.getAttribute('data-picked') + dir) : '';
+        sel.closest('.fld').hidden = !!dir; // the chip above already shows the choice
         if (dir) {
           var has = $$('option', sel).some(function (o) { return o.value === dir || o.text === dir; });
           if (!has) { var o = document.createElement('option'); o.text = dir; o.setAttribute('data-added', ''); sel.add(o); }
@@ -138,7 +143,8 @@
       if (typeof modal.showModal === 'function') {
         modal.showModal();
         document.body.classList.add('locked');
-        $('input[name=name]', copy).focus();
+        // on phones don't pop the keyboard up straight away
+        if (!touch) $('input[name=name]', copy).focus();
       } else {
         location.hash = '#contact';
       }

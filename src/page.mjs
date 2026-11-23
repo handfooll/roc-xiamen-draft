@@ -45,6 +45,7 @@ export function page(t, unis, { css, js, api }) {
 <script src="${js}" defer></script>
 </head>
 <body data-api="${esc(api)}">
+<div class="scroller" id="scroller">
 <a class="skip" href="#main">${t.lang === 'ru' ? 'К содержанию' : '跳到内容'}</a>
 <header class="bar">
 <div class="wrap bar-in">
@@ -112,7 +113,8 @@ ${unis.map(uniCard).join('\n')}
 <div class="formbox" id="formbox">
 <h2 id="form-h">${esc(t.form_h)}</h2>
 <p class="fsub">${esc(t.form_sub)}</p>
-<form class="lead" novalidate data-err-required="${esc(t.f_required)}" data-err-consent="${esc(t.f_consent_err)}" data-fail="${esc(t.f_fail)}" data-preview="${esc(t.f_preview)}">
+<p class="picked"></p>
+<form class="lead" novalidate data-picked="${escRaw(t.picked_prefix)}" data-err-required="${esc(t.f_required)}" data-err-consent="${esc(t.f_consent_err)}" data-fail="${esc(t.f_fail)}" data-preview="${esc(t.f_preview)}">
 <div class="fld"><label for="f-name">${esc(t.f_name)} *</label><input id="f-name" name="name" type="text" autocomplete="name" maxlength="80" required><p class="err"></p></div>
 <div class="fld"><label for="f-contact">${esc(t.f_contact)} *</label><input id="f-contact" name="contact" type="text" autocomplete="tel" maxlength="80" required><p class="err"></p></div>
 <div class="fld"><label for="f-dir">${esc(t.f_dir)}</label><select id="f-dir" name="direction"><option value="">${esc(t.f_dir_any)}</option>${dirOptions}</select></div>
@@ -135,6 +137,7 @@ ${unis.map(uniCard).join('\n')}
 <p>${esc(t.year)}</p>
 </div>
 </footer>
+</div>
 
 <div class="sticky"><button type="button" class="btn lg" data-open="">${esc(t.sticky)}</button></div>
 

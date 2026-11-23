@@ -8,7 +8,12 @@
 *,*::before,*::after{box-sizing:border-box}
 *{margin:0}
 html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:72px}
-body{font-family:var(--font);font-size:16px;line-height:1.55;color:var(--ink);background:var(--ground);-webkit-tap-highlight-color:transparent;padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+body{font-family:var(--font);font-size:16px;line-height:1.55;color:var(--ink);background:var(--ground);-webkit-tap-highlight-color:transparent}
+.scroller{padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+/* WeChat on iOS: scroll inside the page so the toolbar stops hiding and the bottom button stays put */
+html.wx,html.wx body{height:100%;overflow:hidden}
+html.wx .scroller{height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;scroll-padding-top:72px;scroll-behavior:smooth}
+html.wx body.locked .scroller{overflow:hidden}
 img,svg{display:block;max-width:100%}
 button,input,select{font:inherit;color:inherit}
 ul,ol{padding:0;list-style:none}
@@ -95,6 +100,8 @@ h2{font-size:clamp(24px,5.6vw,38px);line-height:1.15;letter-spacing:-.015em;max-
 .contact{padding-bottom:56px}
 .formbox{background:var(--card);border-radius:24px;padding:26px 20px;max-width:620px}
 .fsub{margin-top:8px;color:var(--ink-2)}
+.picked{margin-top:12px;background:var(--blue-soft);color:var(--blue);border-radius:12px;padding:10px 14px;font-weight:600;font-size:15px;line-height:1.35}
+.picked:empty{display:none}
 .lead form,.lead{display:grid;gap:16px;margin-top:20px}
 .fld label{display:block;font-weight:600;font-size:15px;margin-bottom:6px}
 .fld input[type=text],.fld select{width:100%;min-height:50px;border:1.5px solid #c9d1de;border-radius:14px;padding:0 14px;background:#fff;font-size:16px;appearance:none;-webkit-appearance:none}
@@ -124,7 +131,7 @@ label.chk{display:flex;gap:10px;align-items:flex-start;font-weight:400;font-size
 .sticky .btn{width:100%;max-width:420px}
 
 /* modal (native dialog) */
-.modal{border:0;padding:0;width:100%;max-width:520px;max-height:92vh;max-height:92dvh;margin:auto auto 0;border-radius:24px 24px 0 0;background:var(--card);color:var(--ink);overscroll-behavior:contain}
+.modal{border:0;padding:0;width:100%;max-width:520px;max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px - env(safe-area-inset-top,0px));overflow-y:auto;margin:auto auto 0;border-radius:24px 24px 0 0;background:var(--card);color:var(--ink);overscroll-behavior:contain}
 .modal::backdrop{background:rgba(8,20,45,.55)}
 .modal[open]{animation:up .28s cubic-bezier(.2,.8,.2,1)}
 @keyframes up{from{transform:translateY(32px);opacity:0}}
@@ -135,7 +142,7 @@ body.locked{overflow:hidden}
 
 @media(min-width:760px){
   .wrap{padding-left:32px;padding-right:32px}
-  body{padding-bottom:0}
+  .scroller{padding-bottom:0}
   .sticky{display:none}
   .hero{padding:24px 0 64px}
   .stats{grid-template-columns:repeat(3,1fr);gap:14px;margin-top:44px}
@@ -167,6 +174,15 @@ body.locked{overflow:hidden}
   .unis.all .more-cell{grid-column:1/-1}
   .contact .wrap{display:flex;justify-content:center}
 }
+/* first screen builds up on load */
+@keyframes rise{from{opacity:0;transform:translateY(18px)}}
+.hero h1{animation:rise .7s .1s cubic-bezier(.2,.7,.2,1) both}
+.hero .lead{animation:rise .7s .22s cubic-bezier(.2,.7,.2,1) both}
+.hero .btn{animation:rise .7s .34s cubic-bezier(.2,.7,.2,1) both}
+.stats li{animation:rise .7s cubic-bezier(.2,.7,.2,1) both}
+.stats li:nth-child(1){animation-delay:.46s}.stats li:nth-child(2){animation-delay:.54s}.stats li:nth-child(3){animation-delay:.62s}
+/* cards fade in when a filter changes */
+.unis.swap .uni{animation:rise .35s cubic-bezier(.2,.7,.2,1) both}
 /* entrance: only for blocks below the first screen, set by app.js */
 .pre{opacity:0;transform:translateY(22px)}
 .rise{transition:opacity .6s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1);transition-delay:calc(var(--i,0) * 70ms)}
