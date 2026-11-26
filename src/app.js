@@ -20,7 +20,7 @@
     });
     if (filtered) list.classList.add('all');
     else list.classList.toggle('all', more.getAttribute('aria-expanded') === 'true');
-    list.classList.toggle('filtered', filtered);
+    more.parentNode.hidden = filtered;
     list.classList.remove('swap'); void list.offsetWidth; list.classList.add('swap');
     empty.hidden = shown > 0;
   }
@@ -41,6 +41,35 @@
     applyFilter();
     if (!open) $('#universities').scrollIntoView();
   });
+
+  /* "Как поступить" / "Как мы работаем" tabs; without script both lists simply show */
+  var tabs = $$('[role=tab]');
+  function selectTab(tab, focus) {
+    tabs.forEach(function (t) {
+      var on = t === tab, panel = document.getElementById(t.getAttribute('aria-controls'));
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+      panel.hidden = !on;
+      if (on) $$('.pre', panel).forEach(function (el) { el.classList.remove('pre'); });
+    });
+    if (focus) tab.focus();
+  }
+  if (tabs.length) {
+    $('.tabs').hidden = false;
+    document.documentElement.classList.add('has-tabs');
+    tabs.forEach(function (t, i) {
+      t.addEventListener('click', function () { selectTab(t); });
+      t.addEventListener('keydown', function (e) {
+        var k = e.key, n = tabs.length, j = k === 'ArrowRight' ? (i + 1) % n : k === 'ArrowLeft' ? (i + n - 1) % n : k === 'Home' ? 0 : k === 'End' ? n - 1 : -1;
+        if (j < 0) return;
+        e.preventDefault();
+        selectTab(tabs[j], true);
+      });
+    });
+    selectTab(tabs[0]);
+    // the menu item "Как поступить" always opens the first tab
+    $$('a[href="#admission"]').forEach(function (a) { a.addEventListener('click', function () { selectTab(tabs[0]); }); });
+  }
 
   /* entrance for blocks below the first screen; content stays visible without script or observer */
   if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -101,12 +130,15 @@
         .then(function () { btn.disabled = false; });
     });
     return {
-      reset: function (dir) {
+      reset: function (dir, label) {
         form.reset(); form.hidden = false; $('.ok', box).hidden = true; status.hidden = true; started = Date.now();
         $$('.fld', form).forEach(function (f) { f.classList.remove('bad'); });
         var sel = form.direction, picked = $('.picked', box);
         if (picked) picked.textContent = dir ? (dir.indexOf(':') > 0 && dir.indexOf(':') < 6 ? dir : form.getAttribute('data-picked') + dir) : '';
         sel.closest('.fld').hidden = !!dir; // the chip above already shows the choice
+        var lab = $('label[data-default]', form);
+        lab.textContent = (label || lab.getAttribute('data-default')) + ' *';
+        form.contact.setAttribute('autocomplete', label ? 'email' : 'tel');
         if (dir) {
           var has = $$('option', sel).some(function (o) { return o.value === dir || o.text === dir; });
           if (!has) { var o = document.createElement('option'); o.text = dir; o.setAttribute('data-added', ''); sel.add(o); }
@@ -139,7 +171,7 @@
   $$('[data-open]').forEach(function (b) {
     b.addEventListener('click', function () {
       opener = b;
-      mform.reset(b.getAttribute('data-open'));
+      mform.reset(b.getAttribute('data-open'), b.getAttribute('data-label'));
       if (typeof modal.showModal === 'function') {
         modal.showModal();
         document.body.classList.add('locked');

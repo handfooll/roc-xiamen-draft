@@ -21,11 +21,12 @@ export function page(t, unis, { css, js, api }) {
     const place = u.place || u.city.map(c => cityName[c]).join(', ');
     const dir = t.uni_dir_prefix + (u.short ? `${u.short} (${u.ru})` : u.ru);
     return `<li class="uni" data-city="${u.city.join(' ')}" data-profile="${u.profile || ''}"${u.top ? ' data-top' : ''}>
-<h3>${esc(u.ru)}</h3>
+${u.zh ? `<h3 class="zh" lang="zh-CN">${escRaw(u.zh)}</h3>\n<p class="en" lang="en">${escRaw(u.en)}</p>` : `<h3>${esc(u.ru)}</h3>`}
 <p class="meta">${esc(place)}${u.profile ? ' · ' + esc(profName[u.profile]) : ''}</p>${u.note ? `\n<p class="meta">${esc(u.note)}</p>` : ''}
 <button type="button" class="btn ghost sm" data-open="${escRaw(dir)}">${esc(t.uni_cta)}</button>
 </li>`;
   };
+  const partnerBtn = cls => `<button type="button" class="${cls}" data-open="${escRaw(t.partner_dir)}" data-label="${escRaw(t.partner_contact)}">${esc(t.partner_dir)}</button>`;
   const dirOptions = t.programs.map(p => `<option>${escRaw(p.dir)}</option>`).join('');
 
   return `<!doctype html>
@@ -49,8 +50,8 @@ export function page(t, unis, { css, js, api }) {
 <a class="skip" href="#main">${t.lang === 'ru' ? 'К содержанию' : '跳到内容'}</a>
 <header class="bar">
 <div class="wrap bar-in">
-<a class="logo" href="#about" aria-label="俄罗斯教育中心 Russian Education Center"><b>俄罗斯教育中心</b><span>Russian Education Center</span></a>
-<nav aria-label="${t.lang === 'ru' ? 'Разделы' : '导航'}">${t.nav.map(([h, l]) => `<a href="${h}">${esc(l)}</a>`).join('')}</nav>
+<a class="logo" href="#about" aria-label="俄罗斯教育中心 ${escRaw(t.brand_en)}"><b>俄罗斯教育中心</b><span>${escRaw(t.brand_en)}</span></a>
+<nav aria-label="${t.lang === 'ru' ? 'Разделы' : '导航'}">${t.nav.map(([h, l]) => h === 'partner' ? partnerBtn('navbtn') : `<a href="${h}">${esc(l)}</a>`).join('')}</nav>
 <button type="button" class="btn sm" data-open="">${esc(t.cta_header)}</button>
 </div>
 </header>
@@ -95,16 +96,21 @@ ${t.programs.map(p => `<article class="prog" id="p-${p.id}">
 </div>
 <ul class="unis" id="unis" aria-live="polite">
 ${unis.map(uniCard).join('\n')}
-<li class="more-cell"><button type="button" class="btn ghost" id="uni-more" aria-controls="unis" aria-expanded="false" data-more="${escRaw(t.uni_more)}" data-less="${escRaw(t.uni_less)}">${esc(t.uni_more)}</button></li>
 </ul>
+<div class="more-wrap"><button type="button" class="btn ghost" id="uni-more" aria-controls="unis" aria-expanded="false" data-more="${escRaw(t.uni_more)}" data-less="${escRaw(t.uni_less)}">${esc(t.uni_more)}</button></div>
 <p class="empty" id="uni-empty" hidden>${esc(t.uni_empty)}</p>
 </div>
 </section>
 
-<section class="sec steps" id="steps" aria-labelledby="steps-h">
+<section class="sec steps" id="admission" aria-labelledby="admission-h">
 <div class="wrap">
-<h2 id="steps-h">${esc(t.steps_h)}</h2>
-<ol>${t.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
+<h2 id="admission-h">${esc(t.admission_h)}</h2>
+<div class="tabs" role="tablist" aria-labelledby="admission-h" hidden>${t.tabs.map((tab, i) =>
+  `<button type="button" role="tab" id="tab-${tab.id}" aria-controls="panel-${tab.id}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}">${esc(tab.label)}</button>`).join('')}</div>
+${t.tabs.map(tab => `<div class="panel" role="tabpanel" id="panel-${tab.id}" aria-labelledby="tab-${tab.id}" tabindex="0">
+<h3 class="panel-h">${esc(tab.label)}</h3>
+<ol>${tab.steps.map(([h, d]) => `<li><b>${esc(h)}</b><span>${esc(d)}</span></li>`).join('')}</ol>
+</div>`).join('\n')}
 </div>
 </section>
 
@@ -116,7 +122,7 @@ ${unis.map(uniCard).join('\n')}
 <p class="picked"></p>
 <form class="lead" novalidate data-picked="${escRaw(t.picked_prefix)}" data-err-required="${esc(t.f_required)}" data-err-consent="${esc(t.f_consent_err)}" data-fail="${esc(t.f_fail)}" data-preview="${esc(t.f_preview)}">
 <div class="fld"><label for="f-name">${esc(t.f_name)} *</label><input id="f-name" name="name" type="text" autocomplete="name" maxlength="80" required><p class="err"></p></div>
-<div class="fld"><label for="f-contact">${esc(t.f_contact)} *</label><input id="f-contact" name="contact" type="text" autocomplete="tel" maxlength="80" required><p class="err"></p></div>
+<div class="fld"><label for="f-contact" data-default="${escRaw(t.f_contact)}">${esc(t.f_contact)} *</label><input id="f-contact" name="contact" type="text" autocomplete="tel" maxlength="80" required><p class="err"></p></div>
 <div class="fld"><label for="f-dir">${esc(t.f_dir)}</label><select id="f-dir" name="direction"><option value="">${esc(t.f_dir_any)}</option>${dirOptions}</select></div>
 <div class="hp" aria-hidden="true"><label for="f-web">Website</label><input id="f-web" name="website" type="text" tabindex="-1" autocomplete="off"></div>
 <div class="fld"><label class="chk"><input name="consent" type="checkbox" required> <span>${esc(t.f_consent)}</span></label><p class="err"></p></div>
@@ -131,7 +137,8 @@ ${unis.map(uniCard).join('\n')}
 
 <footer class="foot">
 <div class="wrap">
-<p class="logo"><b>俄罗斯教育中心</b><span>Russian Education Center</span></p>
+<p class="logo"><b>俄罗斯教育中心</b><span>${escRaw(t.brand_en)}</span></p>
+<p>${partnerBtn('footbtn')}</p>
 <p>${esc(t.company)}</p>
 <p>${esc(t.address)}</p>
 <p>${esc(t.year)}</p>
