@@ -1,6 +1,6 @@
 // Usage: node build.mjs            -> dist/ preview (form does not send)
 //        API=/api/lead node build.mjs -> dist/ for the server
-import { readFileSync, writeFileSync, mkdirSync, rmSync, copyFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, rmSync, copyFileSync, existsSync, cpSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { page } from './src/page.mjs';
 
@@ -23,5 +23,6 @@ const unis = JSON.parse(readFileSync('content/universities.json', 'utf8'));
 
 writeFileSync(`${out}/index.html`, page(t, unis, { css, js, api }));
 writeFileSync(`${out}/404.html`, readFileSync('src/404.html', 'utf8').replace('__CSS__', css));
-for (const f of ['favicon.svg', 'og.png', 'robots.txt']) if (existsSync(`src/${f}`)) copyFileSync(`src/${f}`, `${out}/${f}`);
+cpSync('src/img', `${out}/img`, { recursive: true });
+for (const f of ['favicon.png', 'apple-touch-icon.png', 'og.png', 'robots.txt']) if (existsSync(`src/${f}`)) copyFileSync(`src/${f}`, `${out}/${f}`);
 console.log(`built ${out}/ (${lang}, api=${api || 'preview'})`);

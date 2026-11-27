@@ -1,6 +1,6 @@
 const escRaw = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 // keep short Russian words on the same line as the next word
-const glue = s => String(s).replace(/(^|[\s(«])(в|во|и|с|со|к|ко|у|о|об|а|но|до|от|на|по|из|за|без|для|не|при|под|над|через|про)\s/gi, '$1$2\u00a0');
+const glue = s => String(s).replace(/(^|[\s(«])(в|во|и|с|со|к|ко|у|о|об|а|но|до|от|на|по|из|за|без|для|не|при|под|над|через|про|г\.)\s/gi, '$1$2\u00a0');
 let esc = escRaw;
 
 const skyline = `<svg class="line" viewBox="0 0 420 100" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
@@ -21,6 +21,7 @@ export function page(t, unis, { css, js, api }) {
     const place = u.place || u.city.map(c => cityName[c]).join(', ');
     const dir = t.uni_dir_prefix + (u.short ? `${u.short} (${u.ru})` : u.ru);
     return `<li class="uni" data-city="${u.city.join(' ')}" data-profile="${u.profile || ''}"${u.top ? ' data-top' : ''}>
+<div class="ulogo"><img src="img/${u.logo}.webp" width="${u.lw / 2}" height="${u.lh / 2}" loading="lazy" decoding="async" alt=""></div>
 ${u.zh ? `<h3 class="zh" lang="zh-CN">${escRaw(u.zh)}</h3>\n<p class="en" lang="en">${escRaw(u.en)}</p>` : `<h3>${esc(u.ru)}</h3>`}
 <p class="meta">${esc(place)}${u.profile ? ' · ' + esc(profName[u.profile]) : ''}</p>${u.note ? `\n<p class="meta">${esc(u.note)}</p>` : ''}
 <button type="button" class="btn ghost sm" data-open="${escRaw(dir)}">${esc(t.uni_cta)}</button>
@@ -41,7 +42,8 @@ ${u.zh ? `<h3 class="zh" lang="zh-CN">${escRaw(u.zh)}</h3>\n<p class="en" lang="
 <meta property="og:title" content="${escRaw(t.title)}">
 <meta property="og:description" content="${escRaw(t.description)}">
 <meta property="og:image" content="og.png">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="${css}">
 <script src="${js}" defer></script>
 </head>
@@ -50,7 +52,7 @@ ${u.zh ? `<h3 class="zh" lang="zh-CN">${escRaw(u.zh)}</h3>\n<p class="en" lang="
 <a class="skip" href="#main">${t.lang === 'ru' ? 'К содержанию' : '跳到内容'}</a>
 <header class="bar">
 <div class="wrap bar-in">
-<a class="logo" href="#about" aria-label="俄罗斯教育中心 ${escRaw(t.brand_en)}"><b>俄罗斯教育中心</b><span>${escRaw(t.brand_en)}</span></a>
+<a class="logo" href="#about" aria-label="俄罗斯教育中心 ${escRaw(t.brand_en)}"><img class="mark" src="img/r.webp" width="65" height="74" alt=""><span class="words"><b>俄罗斯教育中心</b><span>${escRaw(t.brand_en)}</span></span></a>
 <nav aria-label="${t.lang === 'ru' ? 'Разделы' : '导航'}">${t.nav.map(([h, l]) => h === 'partner' ? partnerBtn('navbtn') : `<a href="${h}">${esc(l)}</a>`).join('')}</nav>
 <button type="button" class="btn sm" data-open="">${esc(t.cta_header)}</button>
 </div>
@@ -137,7 +139,7 @@ ${t.tabs.map(tab => `<div class="panel" role="tabpanel" id="panel-${tab.id}" ari
 
 <footer class="foot">
 <div class="wrap">
-<p class="logo"><b>俄罗斯教育中心</b><span>${escRaw(t.brand_en)}</span></p>
+<p class="logo"><img class="mark" src="img/r.webp" width="65" height="74" alt=""><span class="words"><b>俄罗斯教育中心</b><span>${escRaw(t.brand_en)}</span></span></p>
 <p>${partnerBtn('footbtn')}</p>
 <p>${esc(t.company)}</p>
 <p>${esc(t.address)}</p>
