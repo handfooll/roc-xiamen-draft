@@ -4,8 +4,8 @@ const glue = s => String(s).replace(/(?<=^|[\s(«])(в|во|и|с|со|к|ко|�
 let esc = escRaw;
 
 const skyline = `<svg class="line" viewBox="0 0 420 100" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-<path class="draw" stroke="currentColor" stroke-width="1.8" d="M2 90H34V64C20 64 10 58 5 46C26 58 50 56 70 46C90 56 114 58 134 46C129 58 118 64 106 64V90H196V66H206V58H214V66H222V58H230V66H238V90H196M204 58V38H232V58M208 38V30H228V38M212 30L218 8L224 30M240 90H418"/>
-<path class="draw accent" stroke-width="1.8" d="M2 96C80 100 150 96 218 96S350 100 418 94"/>
+<path pathLength="1" class="draw" stroke="currentColor" stroke-width="1.8" d="M2 90H34V64C20 64 10 58 5 46C26 58 50 56 70 46C90 56 114 58 134 46C129 58 118 64 106 64V90H196V66H206V58H214V66H222V58H230V66H238V90H196M204 58V38H232V58M208 38V30H228V38M212 30L218 8L224 30M240 90H418"/>
+<path pathLength="1" class="draw accent" stroke-width="1.8" d="M2 96C80 100 150 96 218 96S350 100 418 94"/>
 <path class="star" d="M218 -8l2.6 5.4 5.9.8-4.3 4.1 1 5.9-5.2-2.8-5.2 2.8 1-5.9-4.3-4.1 5.9-.8z"/>
 </svg>`;
 

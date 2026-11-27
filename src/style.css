@@ -48,11 +48,14 @@ ul,ol{padding:0;list-style:none}
 
 /* hero */
 .hero{background:var(--blue);color:#fff;padding:12px 0 40px;border-radius:0 0 32px 32px}
-.line{width:100%;max-width:440px;height:auto;color:#fff;margin:8px 0 18px}
+.line{width:100%;max-width:440px;height:auto;color:#fff;margin:8px 0 18px;overflow:visible}
 .line .accent{stroke:var(--accent)}
-.line .star{fill:var(--accent)}
-.draw{stroke-dasharray:1400;stroke-dashoffset:1400;animation:draw 2.4s .15s ease forwards}
-@keyframes draw{to{stroke-dashoffset:0}}
+.line .star{fill:var(--accent);transform-box:fill-box;transform-origin:center;animation:star 1.1s 3.3s cubic-bezier(.3,0,.2,1) both}
+/* slow, even drawing: the white skyline first, then the red line under it, the star last */
+.draw{stroke-dasharray:1;stroke-dashoffset:0;animation:draw 3.6s .3s cubic-bezier(.45,.05,.3,1) both}
+.draw.accent{animation-duration:2.8s;animation-delay:1.3s}
+@keyframes draw{from{stroke-dashoffset:1}}
+@keyframes star{from{opacity:0;transform:scale(.4)}}
 .hero h1{font-size:clamp(28px,7.4vw,52px);line-height:1.1;letter-spacing:-.02em;max-width:16em}
 .lead{margin-top:14px;font-size:17px;line-height:1.5;max-width:34em;opacity:.92}
 .hero .btn{margin-top:22px}
@@ -212,7 +215,6 @@ body.locked{overflow:hidden}
   .pre{opacity:1;transform:none}
   html{scroll-behavior:auto}
   *,*::before,*::after{animation:none!important;transition:none!important}
-  .draw{stroke-dashoffset:0}
 }
 /* 404 */
 .nf{min-height:100vh;min-height:100dvh;background:var(--blue);color:#fff;display:flex;flex-direction:column;justify-content:center;gap:28px;padding:32px max(20px,env(safe-area-inset-left,0px))}
