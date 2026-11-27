@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: 22
       - run: python3 -m unittest discover -s server -v
-      - run: node build.mjs
+      - run: SITE_URL=https://handfooll.github.io/roc-xiamen-draft/ node build.mjs
       - run: scripts/check.sh
       - run: shellcheck deploy/*.sh scripts/*.sh
       - run: deploy/check-nginx.sh
@@ -51,7 +51,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: API=/api/lead LANG_MAIN=${{ vars.LANG_MAIN || 'ru' }} node build.mjs
+      - run: API=/api/lead SITE_URL=https://${{ vars.DEPLOY_HOST_DOMAIN || vars.DEPLOY_HOST }}/ LANG_MAIN=${{ vars.LANG_MAIN || 'ru' }} node build.mjs
       - name: ssh key
         run: |
           install -m 700 -d ~/.ssh

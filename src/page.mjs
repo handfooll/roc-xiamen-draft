@@ -1,6 +1,6 @@
 const escRaw = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 // keep short Russian words on the same line as the next word
-const glue = s => String(s).replace(/(^|[\s(«])(в|во|и|с|со|к|ко|у|о|об|а|но|до|от|на|по|из|за|без|для|не|при|под|над|через|про|г\.)\s/gi, '$1$2\u00a0');
+const glue = s => String(s).replace(/(?<=^|[\s(«])(в|во|и|с|со|к|ко|у|о|об|а|но|до|от|на|по|из|за|без|для|не|при|под|над|через|про|г\.)\s/gi, '$1\u00a0');
 let esc = escRaw;
 
 const skyline = `<svg class="line" viewBox="0 0 420 100" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
@@ -9,19 +9,19 @@ const skyline = `<svg class="line" viewBox="0 0 420 100" fill="none" stroke-line
 <path class="star" d="M218 -8l2.6 5.4 5.9.8-4.3 4.1 1 5.9-5.2-2.8-5.2 2.8 1-5.9-4.3-4.1 5.9-.8z"/>
 </svg>`;
 
-export function page(t, unis, { css, js, api }) {
+export function page(t, unis, { css, js, api, site = '' }) {
   esc = t.lang === 'ru' ? s => escRaw(glue(s)) : escRaw;
   const cityName = Object.fromEntries(t.cities);
   const profName = Object.fromEntries(t.profiles);
   const count = k => k === 'all' ? unis.length : unis.filter(u => u.city.includes(k)).length;
   const pcount = k => k === 'all' ? unis.length : unis.filter(u => u.profile === k).length;
   const chip = (group, [k, label], n) =>
-    `<button type="button" class="chip" data-${group}="${k}" aria-pressed="${k === 'all'}">${esc(label)} <span>${n}</span></button>`;
+    `<button type="button" class="chip" data-${group}="${escRaw(k)}" aria-pressed="${k === 'all'}">${esc(label)} <span>${n}</span></button>`;
   const uniCard = u => {
     const place = u.place || u.city.map(c => cityName[c]).join(', ');
     const dir = t.uni_dir_prefix + (u.short ? `${u.short} (${u.ru})` : u.ru);
-    return `<li class="uni" data-city="${u.city.join(' ')}" data-profile="${u.profile || ''}"${u.top ? ' data-top' : ''}>
-<div class="ulogo"><img src="img/${u.logo}.webp" width="${u.lw / 2}" height="${u.lh / 2}" loading="lazy" decoding="async" alt=""></div>
+    return `<li class="uni" data-city="${escRaw(u.city.join(' '))}" data-profile="${escRaw(u.profile || '')}"${u.top ? ' data-top' : ''}>
+<div class="ulogo"><img src="img/${escRaw(u.logo)}.webp" width="${+u.lw / 2}" height="${+u.lh / 2}" loading="lazy" decoding="async" alt=""></div>
 ${u.zh ? `<h3 class="zh" lang="zh-CN">${escRaw(u.zh)}</h3>\n<p class="en" lang="en">${escRaw(u.en)}</p>` : `<h3>${esc(u.ru)}</h3>`}
 <p class="meta">${esc(place)}${u.profile ? ' · ' + esc(profName[u.profile]) : ''}</p>${u.note ? `\n<p class="meta">${esc(u.note)}</p>` : ''}
 <button type="button" class="btn ghost sm" data-open="${escRaw(dir)}">${esc(t.uni_cta)}</button>
@@ -41,7 +41,7 @@ ${u.zh ? `<h3 class="zh" lang="zh-CN">${escRaw(u.zh)}</h3>\n<p class="en" lang="
 <meta property="og:type" content="website">
 <meta property="og:title" content="${escRaw(t.title)}">
 <meta property="og:description" content="${escRaw(t.description)}">
-<meta property="og:image" content="og.png">
+<meta property="og:image" content="${escRaw(site)}og.png">${site ? `\n<meta property="og:url" content="${escRaw(site)}">` : ''}
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="${css}">
@@ -53,7 +53,7 @@ ${u.zh ? `<h3 class="zh" lang="zh-CN">${escRaw(u.zh)}</h3>\n<p class="en" lang="
 <header class="bar">
 <div class="wrap bar-in">
 <a class="logo" href="#about" aria-label="俄罗斯教育中心 ${escRaw(t.brand_en)}"><img class="mark" src="img/r.webp" width="65" height="74" alt=""><span class="words"><b>俄罗斯教育中心</b><span>${escRaw(t.brand_en)}</span></span></a>
-<nav aria-label="${t.lang === 'ru' ? 'Разделы' : '导航'}">${t.nav.map(([h, l]) => h === 'partner' ? partnerBtn('navbtn') : `<a href="${h}">${esc(l)}</a>`).join('')}</nav>
+<nav aria-label="${t.lang === 'ru' ? 'Разделы' : '导航'}">${t.nav.map(([h, l]) => h === 'partner' ? partnerBtn('navbtn') : `<a href="${escRaw(h)}">${esc(l)}</a>`).join('')}</nav>
 <button type="button" class="btn sm" data-open="">${esc(t.cta_header)}</button>
 </div>
 </header>
@@ -73,7 +73,7 @@ ${skyline}
 <div class="wrap">
 <h2 id="programs-h">${esc(t.programs_h)}</h2>
 <div class="programs">
-${t.programs.map(p => `<article class="prog" id="p-${p.id}">
+${t.programs.map(p => `<article class="prog" id="p-${escRaw(p.id)}">
 <h3>${esc(p.title)}</h3>
 <ul>${p.points.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
 <button type="button" class="btn" data-open="${escRaw(p.dir)}">${esc(p.cta)}</button>
@@ -108,8 +108,8 @@ ${unis.map(uniCard).join('\n')}
 <div class="wrap">
 <h2 id="admission-h">${esc(t.admission_h)}</h2>
 <div class="tabs" role="tablist" aria-labelledby="admission-h" hidden>${t.tabs.map((tab, i) =>
-  `<button type="button" role="tab" id="tab-${tab.id}" aria-controls="panel-${tab.id}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}">${esc(tab.label)}</button>`).join('')}</div>
-${t.tabs.map(tab => `<div class="panel" role="tabpanel" id="panel-${tab.id}" aria-labelledby="tab-${tab.id}" tabindex="0">
+  `<button type="button" role="tab" id="tab-${escRaw(tab.id)}" aria-controls="panel-${escRaw(tab.id)}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}">${esc(tab.label)}</button>`).join('')}</div>
+${t.tabs.map(tab => `<div class="panel" role="tabpanel" id="panel-${escRaw(tab.id)}" aria-labelledby="tab-${escRaw(tab.id)}" tabindex="0">
 <h3 class="panel-h">${esc(tab.label)}</h3>
 <ol>${tab.steps.map(([h, d]) => `<li><b>${esc(h)}</b><span>${esc(d)}</span></li>`).join('')}</ol>
 </div>`).join('\n')}

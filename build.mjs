@@ -21,7 +21,8 @@ const js = hashed('app.js', 'js');
 const t = JSON.parse(readFileSync(`content/${lang}.json`, 'utf8'));
 const unis = JSON.parse(readFileSync('content/universities.json', 'utf8'));
 
-writeFileSync(`${out}/index.html`, page(t, unis, { css, js, api }));
+const site = process.env.SITE_URL || ''; // e.g. https://example.com/ so chat apps can load og.png
+writeFileSync(`${out}/index.html`, page(t, unis, { css, js, api, site }));
 writeFileSync(`${out}/404.html`, readFileSync('src/404.html', 'utf8').replace('__CSS__', css));
 cpSync('src/img', `${out}/img`, { recursive: true });
 for (const f of ['favicon.png', 'apple-touch-icon.png', 'og.png', 'robots.txt']) if (existsSync(`src/${f}`)) copyFileSync(`src/${f}`, `${out}/${f}`);
